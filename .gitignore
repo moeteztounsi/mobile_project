@@ -34,7 +34,7 @@ local.properties
 # node.js
 #
 
-mobile-project/node_modules/
+/mobile-project/node_modules/
 node_modules/
 npm-debug.log
 yarn-error.log
