@@ -5,33 +5,15 @@ import imageRemovebgPreview from '../assets/Images/image-removebg-preview.png'
 import { useNavigation } from '@react-navigation/native';
 import CustomInput from '../Components/inputs';
 import CustomButton from '../Components/custumBottun';
+import {useForm} from 'react-hook-form'
 const LoginScreen = ()=>{
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
+    const {control, handleSubmit, formState: {errors}} = useForm();
     const navigation = useNavigation();
     const {height} = useWindowDimensions();
 
-    const onSignIn = async(e)=>{
-       
-        e.preventDefault();
-        
-        try{
-            const config ={
-                headers:{
-                    "Content-Type": "application/json"
-                }
-            }
-
-            const {data}  = await axios.post('http://localhost:7500/api/users/login', {email, password}, config);
-
-            console.log(data);
-            localStorage.setItem("ueseInfo", JSON.stringify(data));
-
-        }catch(error){
-           console.log(error)
-        }
+    const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+    const onSignIn = async(data)=>{
 
         navigation.navigate('Home')
     }
@@ -49,9 +31,9 @@ const LoginScreen = ()=>{
     return(
         <View style={styles.root}>
             <Image source={imageRemovebgPreview} style={[styles.logo,{height:height * 0.3}]}  resizeMode = "contain"/>
-            <CustomInput placeholder = "Email" value={email} setValue={setEmail}/>
-            <CustomInput placeholder = "Password" value = {password} setValue={setPassword} secure = {true}/>
-            <CustomButton text = "Sign In" onPress={onSignIn}/>
+            <CustomInput name="email" placeholder = "Email" control={control} rules={{required: 'Please enter your email', pattern: {value:EMAIL_REGEX, message:"Please Enter a valid email"}}} />
+            <CustomInput name="password" placeholder = "Password" control={control} secure = {true} rules={{required:'Please enter your password'}}/>
+            <CustomButton text = "Sign In" onPress={handleSubmit(onSignIn)}/>
             <CustomButton text="Forgot password?" onPress={onForgotPassword} type="TERTTARY"/>
             <CustomButton text="New here? Sign Up" onPress={onNew} type="TERTTARY"/>
         </View>

@@ -4,41 +4,23 @@ import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, ScrollView, View, useWindowDimensions, Image} from 'react-native'
 import CustomInput from '../Components/inputs';
 import CustomButton from '../Components/custumBottun';
-import axios from 'axios';
+import { useForm } from 'react-hook-form';
 
 const RegisterScreen = ()=>{
     
     const {height} = useWindowDimensions();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [userName, setUsername] = useState("");
-
+    const {control, handleSubmit, watch} = useForm();
     const navigation = useNavigation();
 
-    const onSignUp = async(e)=>{
-       
-        e.preventDefault();
-        try{
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            };
+    const pwd = watch('password');
 
-            const {data}  = await axios.post("http://localhost:7500/api/users/register",
-            {userName,email,password}, config);
+    const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 
-            console.log(data);
-            localStorage.setItem("ueseInfo", JSON.stringify(data));
-            
+    const onSignUp = async(data)=>{
+       console.log(data);
 
-        }catch(err){
-           console.log(err)
-        }
-        
-        navigation.navigate('Home')
+       navigation.navigate('Home')
     }
 
    
@@ -51,11 +33,11 @@ const RegisterScreen = ()=>{
         <ScrollView showsVerticalScrollIndicator = {false}>
             <View style = {styles.root}>
                 <Image source={imageRemovebgPreview} style={[styles.logo,{height:height * 0.3}]}  resizeMode = "contain"/>
-                <CustomInput placeholder = "Username" value={userName} setValue={(newtext)=>setUsername(newtext)}/>
-                <CustomInput placeholder = "Email" value={email} setValue={(newtext)=>setEmail(newtext)}/>
-                <CustomInput placeholder = "Password" value = {password} setValue={(newtext)=>setPassword(newtext)} secure = {true}/>
-                <CustomInput placeholder = "Confirm Password" value = {confirmPassword} setValue={(newtext)=>setConfirmPassword(newtext)} secure = {true}/>
-                <CustomButton text = "Sign Up" onPress={onSignUp}/>
+                <CustomInput name = "username" placeholder = "Username" control={control} rules={{required:'Username is required',minLength: {value:3, message:'Username should be at least 3 charachters'},maxLength: {value:20, message:'Username should not exceed 20 charachters'} }}/>
+                <CustomInput name="email" placeholder = "Email" control={control} rules={{required:'Email is required', pattern: {value :EMAIL_REGEX, message:"Please enter a valid email"}}}/>
+                <CustomInput name="password" placeholder = "Password" control={control} secure = {true} rules={{required:'Password is required', minLength: {value:8, message:'Password should be at least 8 charachters'}}}/>
+                <CustomInput name="confirmPassword" placeholder = "Confirm Password" control={control}  secure = {true} rules={{required:'Confirm Password is required', validate: value => value == pwd || "Password do not match"}}/>
+                <CustomButton text = "Sign Up" onPress={handleSubmit(onSignUp)}/>
                 <CustomButton text="Have an account? Sign In" onPress={onHaveAccount} type="TERTTARY"/>
             </View>
         </ScrollView>
